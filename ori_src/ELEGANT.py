@@ -2,7 +2,7 @@
 # Created Time: 2018/03/12 10:48:38
 # Author: Taihong Xiao <xiaotaihong@126.com>
 
-from dataset import config, MultiCelebADataset
+from dataset import config, MultiCelebADataset,all_attrs
 from nets import Encoder, Decoder, Discriminator
 
 import os
@@ -505,7 +505,7 @@ class ELEGANT(object):
         The first dimension is set to 1, which effectively adds a new dimension to the tensor, making it a 4D tensor.
         The *x.size() syntax is a way of unpacking the dimensions of the original tensor x.
         It allows us to specify the remaining dimensions based on the size of x.
-        
+
         Subtracting 1 shifts the scaled values so that they are centered around zero, with the resulting range being [-1, 1].
         """
         transform2 = lambda x: x.view(1, *x.size()) * 2 - 1

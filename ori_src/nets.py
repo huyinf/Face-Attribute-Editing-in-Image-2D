@@ -61,18 +61,18 @@ class Encoder(nn.Module):
             ),
         ])
 
-        # Initialize the weights of the layers
+
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.normal_(m.weight, mean=0, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
+                nn.init.normal_(m.weight, mean=0, std=0.02)
             elif isinstance(m, nn.ConvTranspose2d):
-                nn.init.normal_(m.weight, mean=0, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
+                nn.init.normal_(m.weight, mean=0, std=0.02)
             elif isinstance(m, nn.BatchNorm2d):
-                nn.init.normal_(m.weight, mean=1, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
-                nn.init.constant_(m.bias, 0)  # Use nn.init.constant_ instead of nn.init.constant
+                nn.init.normal_(m.weight, mean=1, std=0.02)
+                nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, mean=0, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
-                nn.init.constant_(m.bias, 0)  # Use nn.init.constant_ instead of nn.init.constant
+                nn.init.normal_(m.weight, mean=0, std=0.02)
+                nn.init.constant_(m.bias, 0)
 
     def forward(self, x, return_skip=True):
         skip = []
@@ -123,15 +123,15 @@ class Decoder(nn.Module):
         # Initialize the weights of the layers
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.normal_(m.weight, mean=0, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
+                nn.init.normal_(m.weight, mean=0, std=0.02)
             elif isinstance(m, nn.ConvTranspose2d):
-                nn.init.normal_(m.weight, mean=0, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
+                nn.init.normal_(m.weight, mean=0, std=0.02)
             elif isinstance(m, nn.BatchNorm2d):
-                nn.init.normal_(m.weight, mean=1, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
-                nn.init.constant_(m.bias, 0)  # Use nn.init.constant_ instead of nn.init.constant
+                nn.init.normal_(m.weight, mean=1, std=0.02)
+                nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, mean=0, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
-                nn.init.constant_(m.bias, 0)  # Use nn.init.constant_ instead of nn.init.constant
+                nn.init.normal_(m.weight, mean=0, std=0.02)
+                nn.init.constant_(m.bias, 0)
 
     def forward(self, enc1, enc2, skip=None):
         x = torch.cat([enc1, enc2], 1)
@@ -173,15 +173,15 @@ class Discriminator(nn.Module):
         # Initialize the weights of the layers
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.normal_(m.weight, mean=0, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
+                nn.init.normal_(m.weight, mean=0, std=0.02)
             elif isinstance(m, nn.ConvTranspose2d):
-                nn.init.normal_(m.weight, mean=0, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
+                nn.init.normal_(m.weight, mean=0, std=0.02)
             elif isinstance(m, nn.BatchNorm2d):
-                nn.init.normal_(m.weight, mean=1, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
-                nn.init.constant_(m.bias, 0)  # Use nn.init.constant_ instead of nn.init.constant
+                nn.init.normal_(m.weight, mean=1, std=0.02)
+                nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, mean=0, std=0.02)  # Use nn.init.normal_ instead of nn.init.normal
-                nn.init.constant_(m.bias, 0)  # Use nn.init.constant_ instead of nn.init.constant
+                nn.init.normal_(m.weight, mean=0, std=0.02)
+                nn.init.constant_(m.bias, 0)
 
     def forward(self, image, label):
         '''
@@ -200,7 +200,7 @@ class Discriminator(nn.Module):
 
 if __name__ == "__main__":
     """
-    The main entry point of the script. This block of code will be executed 
+    The main entry point of the script. This block of code will be executed
     only if the script is run directly, not when it's imported as a module.
     """
     # Create an instance of the Encoder model

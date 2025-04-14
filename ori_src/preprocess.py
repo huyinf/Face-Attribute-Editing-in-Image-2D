@@ -283,9 +283,9 @@ def main(data_dir, out_dir, thread_num):
 
 if __name__ == '__main__':
     '''
-        The CUDA_VISIBLE_DEVICES environment variable is used to specify 
-        which GPU devices are visible to CUDA-enabled applications. 
-        By setting it to an empty string, you effectively disable CUDA support, 
+        The CUDA_VISIBLE_DEVICES environment variable is used to specify
+        which GPU devices are visible to CUDA-enabled applications.
+        By setting it to an empty string, you effectively disable CUDA support,
         meaning that the script will run on CPU instead of GPU.
     '''
     os.environ["CUDA_VISIBLE_DEVICES"] = ''
