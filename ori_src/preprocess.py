@@ -24,38 +24,37 @@ def align_2p(img, left_eye, right_eye):
     eye_width = 70  # Expected width between the eyes in the aligned image
 
     # Initialize an identity transformation matrix
-    transform = np.matrix([
-        [1, 0, left_eye[0]],
-        [0, 1, left_eye[1]],
-        [0, 0, 1]
-    ], dtype='float')
+    transform = np.matrix(
+        [[1, 0, left_eye[0]], [0, 1, left_eye[1]], [0, 0, 1]], dtype="float"
+    )
 
     # Calculate the angle of rotation based on the line connecting the left and right eyes
     th = np.pi + -np.arctan2(left_eye[1] - right_eye[1], left_eye[0] - right_eye[0])
 
     # Apply rotation transformation to the matrix
-    transform *= np.matrix([
-        [np.cos(th), np.sin(th), 0],
-        [-np.sin(th), np.cos(th), 0],
-        [0, 0, 1]
-    ], dtype='float')
+    transform *= np.matrix(
+        [[np.cos(th), np.sin(th), 0], [-np.sin(th), np.cos(th), 0], [0, 0, 1]],
+        dtype="float",
+    )
 
     # Calculate the scale factor based on the distance between the left and right eyes
-    scale = np.sqrt((left_eye[1] - right_eye[1]) ** 2 + (left_eye[0] - right_eye[0]) ** 2) / eye_width
+    scale = (
+        np.sqrt((left_eye[1] - right_eye[1]) ** 2 + (left_eye[0] - right_eye[0]) ** 2)
+        / eye_width
+    )
 
     # Apply scaling transformation to the matrix
-    transform *= np.matrix([
-        [scale, 0, 0],
-        [0, scale, 0],
-        [0, 0, 1]
-    ], dtype='float')
+    transform *= np.matrix([[scale, 0, 0], [0, scale, 0], [0, 0, 1]], dtype="float")
 
     # Translate the aligned image to the center of the output image
-    transform *= np.matrix([
-        [1, 0, -(width - eye_width) / 2],
-        [0, 1, -width / 2.42],  # Adjusted value for vertical alignment
-        [0, 0, 1]
-    ], dtype='float')
+    transform *= np.matrix(
+        [
+            [1, 0, -(width - eye_width) / 2],
+            [0, 1, -width / 2.42],  # Adjusted value for vertical alignment
+            [0, 0, 1],
+        ],
+        dtype="float",
+    )
 
     # Invert the transformation matrix
     transform = np.linalg.inv(transform)
@@ -87,14 +86,17 @@ def align_face_2p(img, landmarks):
 
     return aligned_img
 
+
 # average landmarks
-mean_face_lm5p = np.array([
-    [-0.17607, -0.172844],  # left eye pupil
-    [0.1736, -0.17356],  # right eye pupil
-    [-0.00182, 0.0357164],  # nose tip
-    [-0.14617, 0.20185],  # left mouth corner
-    [0.14496, 0.19943],  # right mouth corner
-])
+mean_face_lm5p = np.array(
+    [
+        [-0.17607, -0.172844],  # left eye pupil
+        [0.1736, -0.17356],  # right eye pupil
+        [-0.00182, 0.0357164],  # nose tip
+        [-0.14617, 0.20185],  # left mouth corner
+        [0.14496, 0.19943],  # right mouth corner
+    ]
+)
 
 
 def _get_align_5p_mat23_size_256(lm):
@@ -130,7 +132,7 @@ def _get_align_5p_mat23_size_256(lm):
     duy = lm[:, 1] - dmy
     c1 = (ux * dux + uy * duy).sum()
     c2 = (ux * duy - uy * dux).sum()
-    c3 = (dux ** 2 + duy ** 2).sum()
+    c3 = (dux**2 + duy**2).sum()
     a = c1 / c3
     b = c2 / c3
 
@@ -139,7 +141,7 @@ def _get_align_5p_mat23_size_256(lm):
     ky = 1
 
     # Compute additional transformation parameters
-    s = c3 / (c1 ** 2 + c2 ** 2)
+    s = c3 / (c1**2 + c2**2)
     ka = c1 * s
     kb = c2 * s
 
@@ -153,6 +155,7 @@ def _get_align_5p_mat23_size_256(lm):
     transform[1][2] = my - ky * a * dmy + ky * b * dmx
 
     return transform
+
 
 def get_align_5p_mat23(lm5p, size):
     """Align a face given 5 facial landmarks of
@@ -224,8 +227,8 @@ def work(data_dir, out_dir, landmarks, i):
     - int: Return code indicating the success of the processing (0 indicates success).
     """
     # Construct the source and destination image file paths
-    src_imname = os.path.join(data_dir, 'data', '{:06d}.jpg'.format(i + 1))
-    des_imname = os.path.join(out_dir, '{:06d}.jpg'.format(i + 1))
+    src_imname = os.path.join(data_dir, "data", "{:06d}.jpg".format(i + 1))
+    des_imname = os.path.join(out_dir, "{:06d}.jpg".format(i + 1))
 
     # Read the image using OpenCV
     img = cv2.imread(src_imname)
@@ -258,12 +261,14 @@ def main(data_dir, out_dir, thread_num):
         os.makedirs(out_dir)
 
     # Read landmarks from the annotation file
-    with open(os.path.join(data_dir, 'list_landmarks_celeba.txt'), 'r') as f:
+    with open(os.path.join(data_dir, "list_landmarks_celeba.txt"), "r") as f:
         # Extract landmarks for each image and convert them to integers
-        landmarks = [list(map(int, x.split()[1:11])) for x in f.read().strip().split('\n')[2:]]
+        landmarks = [
+            list(map(int, x.split()[1:11])) for x in f.read().strip().split("\n")[2:]
+        ]
 
     # Get the list of image files in the data directory
-    im_list = glob.glob(os.path.join(data_dir, 'data/*.jpg'))
+    im_list = glob.glob(os.path.join(data_dir, "data/*.jpg"))
 
     # Initialize a multiprocessing Pool with the specified number of threads
     pool = Pool(thread_num)
@@ -281,12 +286,12 @@ def main(data_dir, out_dir, thread_num):
     pool.join()
 
 
-if __name__ == '__main__':
-    '''
+if __name__ == "__main__":
+    """
         The CUDA_VISIBLE_DEVICES environment variable is used to specify
         which GPU devices are visible to CUDA-enabled applications.
         By setting it to an empty string, you effectively disable CUDA support,
         meaning that the script will run on CPU instead of GPU.
-    '''
-    os.environ["CUDA_VISIBLE_DEVICES"] = ''
-    main('./datasets/celebA/', './datasets/celebA/align_5p/', 30)
+    """
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    main("./datasets/celebA/", "./datasets/celebA/align_5p/", 30)

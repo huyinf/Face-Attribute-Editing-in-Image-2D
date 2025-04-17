@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
-import os,time
+import os, time
 from PIL import Image
 # from scipy import misc
 # import skimage.transform
@@ -14,64 +14,66 @@ from PIL import Image
 # warnings.filterwarnings("ignore")
 
 all_attrs = [
-    '5_o_Clock_Shadow', 'Arched_Eyebrows', 'Attractive',
-    'Bags_Under_Eyes', 'Bangs', 'Big_Lips',
-    'Big_Nose', 'Black_Hair', 'Blond_Hair',
-    'Blurry', 'Brown_Hair', 'Bushy_Eyebrows',
-    'Chubby', 'Double_Chin', 'Eyeglasses',
-    'Goatee', 'Gray_Hair', 'Heavy_Makeup',
-    'High_Cheekbones', 'Male', 'Mouth_Slightly_Open',
-    'Mustache', 'Narrow_Eyes', 'No_Beard',
-    'Oval_Face', 'Pale_Skin', 'Pointy_Nose',
-    'Receding_Hairline', 'Rosy_Cheeks', 'Sideburns',
-    'Smiling', 'Straight_Hair', 'Wavy_Hair',
-    'Wearing_Earrings', 'Wearing_Hat', 'Wearing_Lipstick',
-    'Wearing_Necklace', 'Wearing_Necktie', 'Young']
+    "5_o_Clock_Shadow","Arched_Eyebrows","Attractive",
+    "Bags_Under_Eyes","Bangs","Big_Lips",
+    "Big_Nose","Black_Hair","Blond_Hair",
+    "Blurry","Brown_Hair","Bushy_Eyebrows",
+    "Chubby","Double_Chin","Eyeglasses",
+    "Goatee","Gray_Hair","Heavy_Makeup",
+    "High_Cheekbones","Male","Mouth_Slightly_Open",
+    "Mustache","Narrow_Eyes","No_Beard",
+    "Oval_Face","Pale_Skin","Pointy_Nose",
+    "Receding_Hairline","Rosy_Cheeks","Sideburns",
+    "Smiling","Straight_Hair","Wavy_Hair",
+    "Wearing_Earrings","Wearing_Hat","Wearing_Lipstick",
+    "Wearing_Necklace","Wearing_Necktie","Young",
+]
+
 
 class Config:
     @property
     def data_dir(self):
-        data_dir = './datasets/celebA'
+        data_dir = "../datasets/celebA"
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
         return data_dir
 
     @property
     def exp_dir(self):
-        exp_dir = os.path.join('train_log')
+        exp_dir = os.path.join("train_log")
         if not os.path.exists(exp_dir):
             os.makedirs(exp_dir)
         return exp_dir
 
     @property
     def model_dir(self):
-        model_dir = os.path.join(self.exp_dir, 'model')
+        model_dir = os.path.join(self.exp_dir, "model")
         if not os.path.exists(model_dir):
             os.makedirs(model_dir)
         return model_dir
 
     @property
     def log_dir(self):
-        log_dir = os.path.join(self.exp_dir, 'log')
+        log_dir = os.path.join(self.exp_dir, "log")
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
         return log_dir
 
     @property
     def img_dir(self):
-        img_dir = os.path.join(self.exp_dir, 'img')
+        img_dir = os.path.join(self.exp_dir, "img")
         if not os.path.exists(img_dir):
             os.makedirs(img_dir)
         return img_dir
 
     # shape of the input tensor [batch_size, channels, height, width]
-    nchw = [8,3,256,256]
+    nchw = [8, 3, 256, 256]
     # learning rate for the generator (G)
     G_lr = 2e-4
     # learning rate for the discriminator (D)
     D_lr = 2e-4
     # betas parameters for the Adam optimizer
-    betas = [0,5, 0.999]
+    betas = [0, 5, 0.999]
     # weight decay for regularization
     weight_decay = 1e-5
     # step size for adjusting the learning rate scheduler
@@ -87,6 +89,7 @@ class Config:
 
     # number of samples in the subset
     num_samples = None
+
 
 config = Config()
 
@@ -109,34 +112,41 @@ class SingleCelebADataset(Dataset):
 
     @property
     def transform(self):
-        transform = transforms.Compose([
-            transforms.Resize(self.config.nchw[-2:]),
-            transforms.ToTensor(),
-        ])
+        transform = transforms.Compose(
+            [
+                transforms.Resize(self.config.nchw[-2:]),
+                transforms.ToTensor(),
+            ]
+        )
         return transform
 
     # generate batches of data from the dataset
     def gen(self):
-        dataloader = DataLoader(self,
-                                batch_size=self.config.nchw[0],
-                                shuffle=self.config.shuffle,
-                                num_workers=self.config.num_workers,
-                                drop_last=True)
+        dataloader = DataLoader(
+            self,
+            batch_size=self.config.nchw[0],
+            shuffle=self.config.shuffle,
+            num_workers=self.config.num_workers,
+            drop_last=True,
+        )
         while True:
             for data in dataloader:
                 # The yield statement allows the method to return data without exiting the loop,
                 # preserving the state of the loop for the next iteration.
                 yield data
 
+
 class MultiCelebADataset(object):
     def __init__(self, attributes, config=config):
         self.attributes = attributes
         self.config = config
 
-        with open(os.path.join(self.config.data_dir, 'list_attr_celeba.txt'), 'r') as f:
-            lines = f.read().strip().split('\n')
+        with open(os.path.join(self.config.data_dir, "list_attr_celeba.txt"), "r") as f:
+            lines = f.read().strip().split("\n")
             # find index of each attribute and add 1 to account for the 1-based indexing
-            col_ids = [lines[1].split().index(attribute) + 1 for attribute in self.attributes]
+            col_ids = [
+                lines[1].split().index(attribute) + 1 for attribute in self.attributes
+            ]
             """
                 A NumPy array containing the labels for all images.
                 It iterates over each line (from the third one), splits each line,
@@ -144,16 +154,25 @@ class MultiCelebADataset(object):
                 converts them to integers, and stores them in the array.
                 The data type of the array is set to np.float32.
             """
-            self.all_labels = np.array([[int(x.split()[col_id]) for col_id in col_ids] for x in lines[2:]], dtype=np.float32)
+            self.all_labels = np.array(
+                [[int(x.split()[col_id]) for col_id in col_ids] for x in lines[2:]],
+                dtype=np.float32,
+            )
             # an array containing the file paths of all images
-            self.im_names = np.array([os.path.join(self.config.data_dir,
-                                                   'align_5p/{:06d}.jpg'.format(idx+1)) for idx in range(len(self.all_labels))])
+            self.im_names = np.array(
+                [
+                    os.path.join(
+                        self.config.data_dir, "align_5p/{:06d}.jpg".format(idx + 1)
+                    )
+                    for idx in range(len(self.all_labels))
+                ]
+            )
 
         # get subset of dataset
         if self.config.num_samples is not None:
-            self.all_labels = self.all_labels[:self.config.num_samples]
-            self.im_names = self.im_names[:self.config.num_samples]
-        print("Total images:",len(self.all_labels))
+            self.all_labels = self.all_labels[: self.config.num_samples]
+            self.im_names = self.im_names[: self.config.num_samples]
+        print("Total images:", len(self.all_labels))
 
         # store data generators for each attribute and label combination
         self.dict = {i: {True: None, False: None} for i in range(len(self.attributes))}
@@ -165,7 +184,9 @@ class MultiCelebADataset(object):
         """
         for attribute_id in range(len(self.attributes)):
             for is_positive in [True, False]:
-                idxs = np.where(self.all_labels[:,attribute_id] == (int(is_positive)*2 - 1))[0]
+                idxs = np.where(
+                    self.all_labels[:, attribute_id] == (int(is_positive) * 2 - 1)
+                )[0]
                 im_names = self.im_names[idxs]
                 labels = self.all_labels[idxs]
                 data_gen = SingleCelebADataset(im_names, labels, self.config).gen()
@@ -176,26 +197,32 @@ class MultiCelebADataset(object):
         data_gen = self.dict[attribute_id][is_positive]
         return data_gen
 
+
 def test():
-    dataset = MultiCelebADataset(['Bangs', 'Smiling'])
+    dataset = MultiCelebADataset(["Bangs", "Smiling"])
     import cProfile
+
     pr = cProfile.Profile()
     pr.enable()
     for i in range(10):
         if i % 4 == 0:
             images, labels = next(dataset.gen(0, True))
         elif i % 4 == 1:
-            images, labels = next(dataset.gen(0,False))
+            images, labels = next(dataset.gen(0, False))
         elif i % 4 == 2:
-            images, labels = next(dataset.gen(1,True))
+            images, labels = next(dataset.gen(1, True))
         elif i % 4 == 3:
-            images, labels = next(dataset.gen(1,False))
+            images, labels = next(dataset.gen(1, False))
         print(i)
         print(images.shape, labels.shape)
         print(labels.numpy())
 
     pr.disable()
-    from IPython import embed; embed(); exit()
+    from IPython import embed
+
+    embed()
+    exit()
+
 
 if __name__ == "__main__":
     test()
